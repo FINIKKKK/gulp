@@ -9,7 +9,6 @@ import browserSync from "browser-sync"; // Локальный сервер
 import newer from "gulp-newer"; // Проверка обновления
 import ifPlugin from "gulp-if"; // Условное ветвление
 import fileinclude from "gulp-file-include"; // Соединение файлов в один
-import cleanFile from "gulp-clean"; // Очистить файл
 // import webpHtml from "gulp-webp-html-nosvg"; // Вставка webp в html
 import versionNumber from "gulp-version-number"; //
 import htmlmin from "gulp-htmlmin"; // Минифицируем HTML
@@ -41,7 +40,7 @@ const path = {
     js: `${buildFolder}/js/`,
     img: `${buildFolder}/img/`,
     fonts: `${buildFolder}/fonts/`,
-    files: `${buildFolder}/files/`,
+    files: `${buildFolder}/`,
   },
   src: {
     html: `${srcFolder}/*.html`,
@@ -161,13 +160,10 @@ const scss = () => {
           cascade: true,
         })
       )
+      .pipe(rename("style.css"))
       .pipe(gulp.dest(path.build.css))
       .pipe(cleanCss())
-      .pipe(
-        rename({
-          extname: "-min.css",
-        })
-      )
+      .pipe(rename("style.min.css"))
       .pipe(gulp.dest(path.build.css))
       .pipe(browserSync.stream())
   );
@@ -187,6 +183,7 @@ const js = () => {
     )
     .pipe(fileinclude())
     .pipe(minify())
+    .pipe(rename("script.min.js"))
     .pipe(gulp.dest(path.build.js))
     .pipe(browserSync.stream());
 };
@@ -279,7 +276,7 @@ const ttf2woff = () => {
 };
 const fontsStyle = () => {
   // Файл стилей подключения шрифтов
-  let fontsFile = `${path.srcFolder}/scss/fonts.scss`;
+  let fontsFile = `${path.srcFolder}/scss/assets/fonts.scss`;
   // Проверяем существуют ли файлы шрифтов
   fs.readdir(path.build.fonts, function (err, fontsFiles) {
     if (fontsFiles) {
@@ -287,54 +284,62 @@ const fontsStyle = () => {
       let file_content = fs.readFileSync(fontsFile);
       if (file_content == "") {
         // Если файла нет, создаем его
-        fs.writeFile(fontsFile, "", cb);
-        let newFileOnly;
-        for (var i = 0; i < fontsFiles.length; i++) {
-          // Записываем подключения шрифтов в файл стилей
-          let fontFileName = fontsFiles[i].split(".")[0];
-          if (newFileOnly !== fontFileName) {
-            let fontName = fontFileName.split("-")[0]
-              ? fontFileName.split("-")[0]
-              : fontFileName;
-            let fontWeight = fontFileName.split("-")[1]
-              ? fontFileName.split("-")[0]
-              : fontFileName;
-            if (fontWeight.toLowerCase() === "thin") {
-              fontWeight = 100;
-            } else if (fontWeight.toLowerCase() === "extralight") {
-              fontWeight = 200;
-            } else if (fontWeight.toLowerCase() === "light") {
-              fontWeight = 300;
-            } else if (fontWeight.toLowerCase() === "medium") {
-              fontWeight = 500;
-            } else if (fontWeight.toLowerCase() === "semibold") {
-              fontWeight = 600;
-            } else if (fontWeight.toLowerCase() === "bold") {
-              fontWeight = 700;
-            } else if (
-              fontWeight.toLowerCase() === "extrabold" ||
-              fontWeight.toLowerCase() === "heavy"
-            ) {
-              fontWeight = 800;
-            } else if (fontWeight.toLowerCase() === "black") {
-              fontWeight = 900;
-            } else {
-              fontWeight = 400;
-            }
-            fs.appendFile(
-              fontsFile,
-              `@font-face{\n\tfont-family: ${fontName};\n\tfont-display: swap;\n\tsrc: url("../fonts/${fontFileName}.woff2") format("woff2"), url("../fonts/${fontFileName}.woff") format("woff");\n\tfont-weight: ${fontWeight};\n\tfont-style: normal;\n}\r\n`,
-              cb
-            );
-            newFileOnly = fontFileName;
-          }
-        }
+        createFontStyles(fontsFile, fontsFiles);
       } else {
-        fontsFile.pipe(clean());
+        // Удаляем файл и созлаем новыми настройками
+        fs.truncate(fontsFile, 0, function () {
+          console.log("done");
+        });
+        createFontStyles(fontsFile, fontsFiles);
       }
     }
   });
   return gulp.src(`${path.srcFolder}`);
+  function cb() {}
+  function createFontStyles(fontsFile, fontsFiles) {
+    fs.writeFile(fontsFile, "", cb);
+    let newFileOnly;
+    for (var i = 0; i < fontsFiles.length; i++) {
+      // Записываем подключения шрифтов в файл стилей
+      let fontFileName = fontsFiles[i].split(".")[0];
+      if (newFileOnly !== fontFileName) {
+        let fontName = fontFileName.split("-")[0]
+          ? fontFileName.split("-")[0]
+          : fontFileName;
+        let fontWeight = fontFileName.split("-")[1]
+          ? fontFileName.split("-")[0]
+          : fontFileName;
+        if (fontWeight.toLowerCase() === "thin") {
+          fontWeight = 100;
+        } else if (fontWeight.toLowerCase() === "extralight") {
+          fontWeight = 200;
+        } else if (fontWeight.toLowerCase() === "light") {
+          fontWeight = 300;
+        } else if (fontWeight.toLowerCase() === "medium") {
+          fontWeight = 500;
+        } else if (fontWeight.toLowerCase() === "semibold") {
+          fontWeight = 600;
+        } else if (fontWeight.toLowerCase() === "bold") {
+          fontWeight = 700;
+        } else if (
+          fontWeight.toLowerCase() === "extrabold" ||
+          fontWeight.toLowerCase() === "heavy"
+        ) {
+          fontWeight = 800;
+        } else if (fontWeight.toLowerCase() === "black") {
+          fontWeight = 900;
+        } else {
+          fontWeight = 400;
+        }
+        fs.appendFile(
+          fontsFile,
+          `@font-face{\n\tfont-family: ${fontName};\n\tfont-display: swap;\n\tsrc: url("../fonts/${fontFileName}.woff2") format("woff2"), url("../fonts/${fontFileName}.woff") format("woff");\n\tfont-weight: ${fontWeight};\n\tfont-style: normal;\n}\r\n`,
+          cb
+        );
+        newFileOnly = fontFileName;
+      }
+    }
+  }
 };
 
 // Функция создания svg-спрайтов
