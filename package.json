@@ -44,7 +44,7 @@
   },
   "scripts": {
     "dev": "gulp",
-    "dist": "gulp build --build"
+    "build": "gulp build --build"
   },
   "author": "digikrash",
   "license": "ISC"
