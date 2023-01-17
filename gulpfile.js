@@ -9,23 +9,23 @@ import browserSync from "browser-sync"; // Локальный сервер
 import newer from "gulp-newer"; // Проверка обновления
 import ifPlugin from "gulp-if"; // Условное ветвление
 import fileinclude from "gulp-file-include"; // Соединение файлов в один
-// import webpHtml from "gulp-webp-html-nosvg"; // Вставка webp в html
+import webpHtml from "gulp-webp-html-nosvg"; // Вставка webp в html
 import versionNumber from "gulp-version-number"; //
 import htmlmin from "gulp-htmlmin"; // Минифицируем HTML
 import del from "del"; // Удаление файлов
 import sass from "gulp-sass"; // Преобразование sass в css
 import rename from "gulp-rename"; // Переименование файлов
 import cleanCss from "gulp-clean-css"; // Сжатие CSS файла
-// import webpcss from "gulp-webpcss"; // Вывод WEBP изображений
+import webpcss from "gulp-webpcss"; // Вывод WEBP изображений
 import autoprefixer from "gulp-autoprefixer"; // Добавление вендорных префиксов
 import groupCssMediaQueries from "gulp-group-css-media-queries"; // Группировка медиа запросов
-import minify from "gulp-minify"; // Минифицируем js
-// import webp from 'gulp-webp'; // Создаем webp
+import webp from "gulp-webp"; // Создаем webp
 import imagemin from "gulp-imagemin"; // Минифицируем картинки
 import fs from "fs"; // Для шрифтов
 import fonter from "gulp-fonter"; // Для шрифтов
 import ttf2woff2 from "gulp-ttf2woff2"; // Преобразование ttf в woff
 import gulpSvgSprite from "gulp-svg-sprite"; // Создание спрайтов svg
+import webpack from "webpack-stream"; // Использование ES6 синтаксиса
 
 // Главные директории
 const rootFolder = nodePath.basename(nodePath.resolve());
@@ -44,7 +44,7 @@ const path = {
   },
   src: {
     html: `${srcFolder}/*.html`,
-    scss: `${srcFolder}/scss/app.scss`,
+    scss: `${srcFolder}/scss/style.scss`,
     js: `${srcFolder}/js/script.js`,
     img: `${srcFolder}/img/**/*.{jpg,jpeg,png,gif,webp}`,
     svgIcons: `${srcFolder}/img/**/*.svg`,
@@ -96,77 +96,77 @@ const copy = () => {
 
 // Функция преобразования html
 const html = () => {
-  return (
-    gulp
-      .src(path.src.html)
-      .pipe(
-        plumber(
-          notify.onError({
-            title: "HTML",
-            message: "Error: <%= error.message %>",
-          })
-        )
+  return gulp
+    .src(path.src.html)
+    .pipe(
+      plumber(
+        notify.onError({
+          title: "HTML",
+          message: "Error: <%= error.message %>",
+        })
       )
-      .pipe(fileinclude())
-      // .pipe(webpHtml())
-      .pipe(ifPlugin(app.isBuild, htmlmin({ collapseWhitespace: true })))
-      .pipe(
-        ifPlugin(
-          app.isBuild,
-          versionNumber({
-            value: "%DT%",
-            append: {
-              key: "_v",
-              cover: 0,
-              to: ["css", "js"],
-            },
-          })
-        )
+    )
+    .pipe(fileinclude())
+    .pipe(
+      ifPlugin(app.isBuild, webpHtml(), htmlmin({ collapseWhitespace: true }))
+    )
+    .pipe(
+      ifPlugin(
+        app.isBuild,
+        versionNumber({
+          value: "%DT%",
+          append: {
+            key: "_v",
+            cover: 0,
+            to: ["css", "js"],
+          },
+        })
       )
-      .pipe(gulp.dest(path.build.html))
-      .pipe(browserSync.stream())
-  );
+    )
+    .pipe(gulp.dest(path.build.html))
+    .pipe(browserSync.stream());
 };
 
 // Функция преобразования scss
 const scss = () => {
-  return (
-    gulp
-      .src(path.src.scss, { sourcemaps: true })
-      .pipe(
-        plumber(
-          notify.onError({
-            title: "SCSS",
-            message: "Error: <%= error.message %>",
-          })
-        )
-      )
-      .pipe(
-        sass({
-          outputStyle: "expanded",
+  return gulp
+    .src(path.src.scss, { sourcemaps: true })
+    .pipe(
+      plumber(
+        notify.onError({
+          title: "SCSS",
+          message: "Error: <%= error.message %>",
         })
       )
-      .pipe(groupCssMediaQueries())
-      // .pipe(webpcss(
-      //     {
-      //         webpClass: ".webp",
-      //         noWebpClass: ".no-webp",
-      //     }
-      // ))
-      .pipe(
-        autoprefixer({
-          grid: true,
-          overrideBrowserslist: ["last 3 versions"],
-          cascade: true,
+    )
+    .pipe(
+      sass({
+        outputStyle: "expanded",
+      })
+    )
+    .pipe(groupCssMediaQueries())
+    .pipe(
+      ifPlugin(
+        app.isBuild,
+        webpcss({
+          webpClass: ".webp",
+          noWebpClass: ".no-webp",
         })
       )
-      .pipe(rename("style.css"))
-      .pipe(gulp.dest(path.build.css))
-      .pipe(cleanCss())
-      .pipe(rename("style.min.css"))
-      .pipe(gulp.dest(path.build.css))
-      .pipe(browserSync.stream())
-  );
+    )
+    .pipe(
+      autoprefixer({
+        grid: true,
+        overrideBrowserslist: ["last 3 versions"],
+        cascade: true,
+      })
+    )
+    .pipe(rename("style.css"))
+    .pipe(gulp.dest(path.build.css))
+    .pipe(cleanCss())
+    .pipe(rename("style.min.css"))
+    .pipe(gulp.dest(path.build.css))
+    .pipe(browserSync.stream());
 };
 
 // Функция преобразования js
@@ -181,9 +181,12 @@ const js = () => {
         })
       )
     )
-    .pipe(fileinclude())
-    .pipe(minify())
-    .pipe(rename("script.min.js"))
+    .pipe(webpack({
+      mode: 'development',
+      output: {
+        filename: 'script.js'
+      }
+    }))
     .pipe(gulp.dest(path.build.js))
     .pipe(browserSync.stream());
 };
@@ -201,10 +204,10 @@ const img = () => {
           })
         )
       )
-      // .pipe(newer(path.build.img))
-      // .pipe(webp())
-      // .pipe(gulp.dest(path.build.img))
-      // .pipe(gulp.src(path.src.img))
+      .pipe(ifPlugin(app.isBuild, newer(path.build.img)))
+      .pipe(ifPlugin(app.isBuild, webp()))
+      .pipe(ifPlugin(app.isBuild,  gulp.dest(path.build.img)))
+      .pipe(gulp.src(path.src.img))
       .pipe(newer(path.build.img))
       .pipe(
         imagemin({

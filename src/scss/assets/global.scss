@@ -15,14 +15,17 @@ body {
   position: relative;
   overflow-x: hidden;
   min-width: 320px;
-  font-family: $font;
+  font-family: $f1;
   font-weight: 400;
   font-size: 16px;
   line-height: 18px;
-  color: $main;
+  color: #000;
 }
 a {
-  color: $main;
+  color: #000;
+}
+svg {
+  fill: #000;
 }
 
 // ---- Global-Classes ----
