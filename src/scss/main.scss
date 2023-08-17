@@ -1,0 +1,86 @@
+.header {
+  padding: 32px 0;
+  .menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    color: $black;
+    text-decoration: none;
+    img {
+      width: 46px;
+      height: 40px;
+      object-fit: cover;
+      margin-right: 16px;
+    }
+    h5 {
+      font-size: 18px;
+      line-height: 32px;
+    }
+    p {
+      font-size: 14px;
+      line-height: 24px;
+      transition: 0.2s;
+    }
+  }
+  .search {
+    width: 874px;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+  }
+  .control {
+    &:not(:last-child) {
+      margin-right: 32px;
+    }
+    a {
+    text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    .icon {
+      position: relative;
+      i {
+        font-size: 24px;
+        line-height: 24px;
+        margin-right: 16px;
+      }
+      span {
+        background-color: $yellow;
+        border-radius: 50%;
+        font-size: 12px;
+        line-height: 12px;
+        border: 3px solid $white;
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $black;
+        position: absolute;
+        top: -5px;
+        right: 4px;
+      }
+    }
+    p {
+      color: $black;
+      font-size: 14px;
+      line-height: 24px;
+    }
+    &:hover {
+      p {
+        color: $blue;
+      }
+    }
+  }
+  .catalog {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
