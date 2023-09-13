@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="ru">
 
+<!-- Meta -->
 @@include('./blocks/main/head.html', {
-"title": "Главная",
+    "title": "Главная",
 })
 
 <body>
-
-    @@include('./blocks/header.html')
-
-
-    <div class="categories"></div>
-
-    @@include('./blocks/footer.html')
+    <div class="container">
+        @@include('./blocks/header.html')
 
 
-    <!-- Scripts -->
-    @@include('./blocks/main/js.html')
+        @@include('./blocks/footer.html')
 
+        <p style="font-weight: 700">Hello</p>
+        <p style="font-weight: 400">Hello</p>
+        <p style="font-weight: 300">Hello</p>
+
+        <i class="fa-regular fa-user"></i>
+        <i class="fa-regular fa-user" style="font-weight: 700"></i>
+
+        <!-- Scripts -->
+        @@include('./blocks/main/js.html')
+    </div>
 </body>
 
 </html>

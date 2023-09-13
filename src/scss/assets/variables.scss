@@ -1,9 +1,12 @@
-$f1: 'Circe', sans-serif;
+// ---- Fonts ----
+$font: 'Circe', sans-serif;
 
-$black: #333;
-$white: #fff;
-$blue: #0E6CDD;
-$blue_d: #00479C;
-$blue_l: rgba(#0E6CDD, 0.5);
-$yellow: #FFD740;
-$bg: #F1F6FD;
+// ---- Colors ----
+$white: #ffffff;
+$black: #000000;
+$blue: #0e65dd;
+$gray: #77889c;
+$yellow: #ffd740;
+$bg: #f1f6fd;
+$red: #bd081c;
+$red2: rgba($red, 0.5);

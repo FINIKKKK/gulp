@@ -4,7 +4,6 @@ This build was created specifically to free you from tedious and routine work, t
 
 ## What this build can do 🛠:
 - Launch a local server with active changes displayed
-- Easily copy files from the**/files (src)** folder to **/ (dist)**
 - Merge different **html** files into one
 - Convert **scss** files into **css** 
 - Group scattered **media** queries from different files  

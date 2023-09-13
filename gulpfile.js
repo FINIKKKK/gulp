@@ -13,10 +13,8 @@ import webpHtml from "gulp-webp-html-nosvg"; // Вставка webp в html
 import versionNumber from "gulp-version-number"; //
 import htmlmin from "gulp-htmlmin"; // Минифицируем HTML
 import del from "del"; // Удаление файлов
-import dartSass from 'sass';
+import * as dartSass from 'sass';
 import gulpSass from 'gulp-sass';
-
-const sass = gulpSass(dartSass); // Преобразование sass в css
 import rename from "gulp-rename"; // Переименование файлов
 import cleanCss from "gulp-clean-css"; // Сжатие CSS файла
 import webpcss from "gulp-webpcss"; // Вывод WEBP изображений
@@ -29,6 +27,8 @@ import fonter from "gulp-fonter"; // Для шрифтов
 import ttf2woff2 from "gulp-ttf2woff2"; // Преобразование ttf в woff
 import gulpSvgSprite from "gulp-svg-sprite"; // Создание спрайтов svg
 import webpack from "webpack-stream"; // Использование ES6 синтаксиса
+
+const sass = gulpSass(dartSass); // Преобразование sass в css
 
 // Главные директории
 const rootFolder = nodePath.basename(nodePath.resolve());
@@ -168,20 +168,6 @@ const img = () => {
 };
 
 // Функции преобразования шрифтов
-const otf2ttf = () => {
-    // Ищем файлы шрифтов .otf
-    return (gulp
-        .src(`${path.srcFolder}/fonts/*.otf`, {})
-        .pipe(plumber(notify.onError({
-            title: "FONTS", message: "Error: <%= error.message %>",
-        })))
-        // Конвертация в .ttf
-        .pipe(fonter({
-            formats: ["ttf"],
-        }))
-        // Выгружвем в исходную папку
-        .pipe(gulp.dest(`${path.srcFolder}/fonts/`)));
-};
 const ttf2woff = () => {
     // Ищем файлы шрифтов .ttf
     return (gulp
@@ -189,10 +175,10 @@ const ttf2woff = () => {
         .pipe(plumber(notify.onError({
             title: "FONTS", message: "Error: <%= error.message %>",
         })))
-        // Конвертация в .woff
-        .pipe(fonter({
-            formats: ["woff"],
-        }))
+        // // Конвертация в .woff
+        // .pipe(fonter({
+        //     formats: ["woff"],
+        // }))
         // Выгружвем в папку с результтом
         .pipe(gulp.dest(`${path.build.fonts}`))
         // Ищем файлы шрифтов .ttf
@@ -290,9 +276,6 @@ const svgSprite = () => {
         .pipe(browserSync.stream());
 };
 
-// Последовательная обработка шрифтов
-const fonts = gulp.series(otf2ttf, ttf2woff, fontsStyle);
-
 // Наблюдатель за изменениями в файлах
 function watcher() {
     gulp.watch(path.watch.files, copy);
@@ -301,20 +284,22 @@ function watcher() {
     gulp.watch(path.watch.js, js);
     gulp.watch(path.watch.img, img);
     gulp.watch(path.watch.svgIcons, svgSprite);
-    gulp.watch(path.watch.fonts, fonts);
+    gulp.watch(path.watch.fonts, ttf2woff);
 }
 
 // Основные задачи
-const mainTasks = gulp.series(fonts, gulp.parallel(copy, html, scss, js, img, svgSprite));
+const mainTasks = gulp.series(ttf2woff, gulp.parallel(copy, html, scss, js, img, svgSprite));
 
 // Построение сценариев выполнения задач
 const start = gulp.series(reset, mainTasks, gulp.parallel(watcher, server));
 const dev = gulp.series(reset, mainTasks);
 const build = gulp.series(reset, mainTasks);
+const fonts = fontsStyle
 
 // Экспорт сценариев
 export {dev};
 export {build};
+export {fonts};
 
 // Выполлнение сценария по умолчанию
 gulp.task("default", start);

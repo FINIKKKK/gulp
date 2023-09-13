@@ -1,8 +1,14 @@
+// Plugins
 @import "plugins/fontawesome.min";
 
+// Base
 @import "assets/reset";
 @import "assets/variables";
 @import "assets/fonts";
 @import "assets/global";
 
+// Media
+@import "media";
+
+// Главные стили
 @import "main";
