@@ -175,10 +175,6 @@ const ttf2woff = () => {
         .pipe(plumber(notify.onError({
             title: "FONTS", message: "Error: <%= error.message %>",
         })))
-        // // Конвертация в .woff
-        // .pipe(fonter({
-        //     formats: ["woff"],
-        // }))
         // Выгружвем в папку с результтом
         .pipe(gulp.dest(`${path.build.fonts}`))
         // Ищем файлы шрифтов .ttf

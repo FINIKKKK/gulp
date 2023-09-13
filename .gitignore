@@ -2,3 +2,4 @@ node_modules/
 *.fig
 *.zip
 dist/
+.idea
